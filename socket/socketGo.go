@@ -1,5 +1,8 @@
 package socket
 
-import socketio "github.com/googollee/go-socket.io"
+import (
+	socketio "github.com/googollee/go-socket.io"
+)
 
-var CurrentSocket socketio.Conn
+// Server будет хранить глобальную ссылку на экземпляр сервера Socket.IO
+var Server *socketio.Server
