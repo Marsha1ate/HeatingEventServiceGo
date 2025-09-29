@@ -1,5 +1,5 @@
 package socket
 
-import socketio "github.com/googollee/go-socket.io"
+import socketio "github.com/zishang520/socket.io/servers/socket/v3"
 
-var CurrentSocket socketio.Conn
+var Server *socketio.Server

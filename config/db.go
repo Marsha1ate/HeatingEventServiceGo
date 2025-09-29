@@ -17,7 +17,7 @@ func ConnectDB() {
 	dbName := GetEnv("DB_NAME", "messages")
 	dbUser := GetEnv("DB_USER", "postgres")
 	dbPassword := GetEnv("DB_PASSWORD", "postgres")
-	dbHost := GetEnv("DB_HOST", "postgres")
+	dbHost := GetEnv("DB_HOST", "localhost")
 	dbPortStr := GetEnv("PORT", "5432")
 	dbPort, err := strconv.Atoi(dbPortStr)
 	if err != nil {
