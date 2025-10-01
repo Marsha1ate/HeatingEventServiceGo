@@ -4,8 +4,9 @@ go 1.24.1
 
 require (
 	github.com/gorilla/mux v1.8.1
-	github.com/maldikhan/go.socket.io v0.1.1
 	github.com/rs/cors v1.11.1
+	github.com/zishang520/socket.io/servers/socket/v3 v3.0.0-rc.8
+	github.com/zishang520/socket.io/v3 v3.0.0-rc.8
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.25.10
 )
@@ -30,9 +31,6 @@ require (
 	github.com/zishang520/socket.io/parsers/engine/v3 v3.0.0-rc.8 // indirect
 	github.com/zishang520/socket.io/parsers/socket/v3 v3.0.0-rc.8 // indirect
 	github.com/zishang520/socket.io/servers/engine/v3 v3.0.0-rc.8 // indirect
-	github.com/zishang520/socket.io/servers/socket/v3 v3.0.0-rc.8 // indirect
-	github.com/zishang520/socket.io/v2 v2.5.0 // indirect
-	github.com/zishang520/socket.io/v3 v3.0.0-rc.8 // indirect
 	github.com/zishang520/webtransport-go v0.9.1 // indirect
 	go.uber.org/mock v0.6.0 // indirect
 	golang.org/x/crypto v0.42.0 // indirect

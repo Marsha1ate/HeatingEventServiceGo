@@ -16,6 +16,7 @@ import (
 
 	"github.com/gorilla/mux"
 	socketio "github.com/zishang520/socket.io/servers/socket/v3"
+	"github.com/zishang520/socket.io/v3/pkg/types"
 )
 
 func main() {
@@ -23,8 +24,17 @@ func main() {
 	config.ConnectDB()
 	models.DB = config.DB
 
-	// Создаём Socket.IO сервер
-	socket.Server = socketio.NewServer(nil, nil)
+	opts := socketio.DefaultServerOptions()
+	opts.SetPingTimeout(20 * time.Second)
+	opts.SetPingInterval(25 * time.Second)
+	opts.SetMaxHttpBufferSize(1e6)
+	opts.SetCors(&types.Cors{
+		Origin:      "*",
+		Credentials: true,
+	})
+
+	// Создаём сервер Socket.IO
+	socket.Server = socketio.NewServer(nil, opts)
 
 	// Обработка подключения клиентов
 	socket.Server.On("connection", func(clients ...any) {
@@ -81,19 +91,31 @@ func main() {
 		w.Write([]byte(`{"status":"ok","service":"SocketIOService"}`))
 	})
 
+	router.PathPrefix("/socket.io/").Handler(socket.Server.ServeHandler(nil))
+
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},                             // Разрешает все origins
 		AllowedMethods:   []string{"GET", "POST", "PUT", "OPTIONS"}, // Добавили OPTIONS явно
 		AllowedHeaders:   []string{"*"},
-		ExposedHeaders:   []string{"Content-Length"},
 		AllowCredentials: true,
-		Debug:            true, // Включаем дебаг rs/cors (логи в консоль сервера)
-	})
+		Debug:            false, // Включаем дебаг rs/cors (логи в консоль сервера)
+	}).Handler(router)
 
-	handler := c.Handler(router)
 	// Привязываем Socket.IO к HTTP
-	http.Handle("/socket.io/", socket.Server.ServeHandler(nil))
-	http.Handle("/", c.Handler(handler))
+	/*http.Handle("/socket.io/", c)
+	http.Handle("/", c)
+	muxRouter := http.NewServeMux()
+	muxRouter.Handle("/socket.io/", socket.Server.ServeHandler(nil))*/
+	/*muxHandler := http.NewServeMux()
+	muxHandler.Handle("/socket.io/", c)
+	muxHandler.Handle("/", cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	}).Handler(router))*/
+
+	//http.ListenAndServe(":5200", muxRouter)
 
 	// Запуск сервера
 	port := os.Getenv("PORT")
@@ -101,5 +123,5 @@ func main() {
 		port = "5200"
 	}
 	log.Printf("Сервер запущен на порту %s", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, c))
 }
