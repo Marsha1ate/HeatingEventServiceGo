@@ -24,7 +24,6 @@ type CreateMessageRequest struct {
 func CreateMessage(w http.ResponseWriter, r *http.Request) {
 	var req CreateMessageRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		fmt.Println("Ошибка декодирования тела запроса:", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -44,16 +43,14 @@ func CreateMessage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := models.DB.Create(&message).Error; err != nil {
-		fmt.Println("Ошибка создания сообщения в БД:", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if socket.Server != nil {
 		socket.Server.Emit("new-message", message)
-		fmt.Println("Отправлено событие new-message всем клиентам на /socket.io/")
-	} else {
-		fmt.Println("Socket.IO сервер не инициализирован")
+		jsonMsg, _ := json.MarshalIndent(message, "", "  ")
+		fmt.Printf(" %+v\n", string(jsonMsg))
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -64,12 +61,10 @@ func CreateMessage(w http.ResponseWriter, r *http.Request) {
 func GetAllMessages(w http.ResponseWriter, r *http.Request) {
 	var messages []models.Message
 	if err := models.DB.Find(&messages).Error; err != nil {
-		fmt.Println("Ошибка получения всех сообщений:", err)
 		http.Error(w, `{"message": "INTERNAL SERVER ERROR"}`, http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Println("Возвращено сообщений:", len(messages))
 	json.NewEncoder(w).Encode(messages)
 }
 
@@ -137,11 +132,9 @@ func FilterMessages(w http.ResponseWriter, r *http.Request) {
 
 	var messages []models.Message
 	if err := dbQuery.Find(&messages).Error; err != nil {
-		fmt.Println("Ошибка запроса к БД в FilterMessages:", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Println("FilterMessages возвращено сообщений:", len(messages))
 	json.NewEncoder(w).Encode(messages)
 }

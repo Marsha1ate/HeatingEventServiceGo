@@ -18,7 +18,7 @@ func ConnectDB() {
 	dbUser := GetEnv("DB_USER", "postgres")
 	dbPassword := GetEnv("DB_PASSWORD", "postgres")
 	dbHost := GetEnv("DB_HOST", "localhost")
-	dbPortStr := GetEnv("PORT", "5432")
+	dbPortStr := GetEnv("DB_PORT", "5432")
 	dbPort, err := strconv.Atoi(dbPortStr)
 	if err != nil {
 		dbPort = 5432
@@ -35,23 +35,6 @@ func ConnectDB() {
 		panic("AutoMigrate failed: " + err.Error())
 	}
 
-	// Установка дефолтов для колонок (если таблица существует)
-	DB.Exec("ALTER TABLE IF EXISTS messages ALTER COLUMN server_time SET DEFAULT CURRENT_TIMESTAMP;")
-	DB.Exec("ALTER TABLE IF EXISTS messages ALTER COLUMN source_time SET DEFAULT CURRENT_TIMESTAMP;")
-
-	// Фикс старых записей: установить NOW() где zero
-	result := DB.Exec("UPDATE messages SET server_time = CURRENT_TIMESTAMP WHERE server_time = '0001-01-01 00:00:00'::timestamp;")
-	if result.Error != nil {
-		fmt.Println("Ошибка обновления server_time:", result.Error)
-	} else {
-		fmt.Println("Обновлено записей server_time:", result.RowsAffected)
-	}
-	result = DB.Exec("UPDATE messages SET source_time = CURRENT_TIMESTAMP WHERE source_time = '0001-01-01 00:00:00'::timestamp;")
-	if result.Error != nil {
-		fmt.Println("Ошибка обновления source_time:", result.Error)
-	} else {
-		fmt.Println("Обновлено записей source_time:", result.RowsAffected)
-	}
 	fmt.Println("DATABASE CONNECTED")
 }
 
